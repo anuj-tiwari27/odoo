@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: odoo
+    runtime: docker
+    plan: starter plus
+    healthCheckPath: /web/login
+    dockerCommand: bash /opt/odoo/render-start.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: odoo-db
+          property: connectionString
+      - key: ODOO_ADMIN_PASSWD
+        generateValue: true
+
+databases:
+  - name: odoo-db
+    plan: starter

@@ -38,6 +38,10 @@ COPY --chown=odoo:odoo . /opt/odoo
 # Copy deployment config
 COPY --chown=odoo:odoo odoo.deploy.conf /etc/odoo/odoo.conf
 
+# Copy render startup script
+COPY --chown=odoo:odoo render-start.sh /opt/odoo/render-start.sh
+RUN chmod +x /opt/odoo/render-start.sh
+
 VOLUME ["/var/lib/odoo"]
 EXPOSE 8069 8072
 
