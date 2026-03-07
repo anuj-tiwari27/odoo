@@ -30,7 +30,7 @@ RUN useradd -m -d /opt/odoo -s /bin/bash odoo \
 
 # Install Python dependencies
 COPY requirements.txt /opt/odoo/requirements.txt
-RUN pip install --no-cache-dir -r /opt/odoo/requirements.txt
+RUN pip install --no-cache-dir --prefer-binary -r /opt/odoo/requirements.txt
 
 # Copy source code
 COPY --chown=odoo:odoo . /opt/odoo
