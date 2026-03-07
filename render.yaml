@@ -2,7 +2,7 @@ services:
   - type: web
     name: odoo
     runtime: docker
-    plan: starter plus
+    plan: free
     healthCheckPath: /web/login
     dockerCommand: bash /opt/odoo/render-start.sh
     envVars:
@@ -15,4 +15,4 @@ services:
 
 databases:
   - name: odoo-db
-    plan: starter
+    plan: free
