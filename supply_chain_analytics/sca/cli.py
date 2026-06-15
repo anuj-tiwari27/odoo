@@ -67,6 +67,15 @@ def cmd_run(config: Config, args) -> None:
     cmd_analyze(config, args)
 
 
+def cmd_serve(config: Config, args) -> None:
+    from datetime import date as _date
+
+    from .web import serve
+
+    today = _date.fromisoformat(args.today) if args.today else _date.today()
+    serve(config, args.host, args.port, today)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="sca", description=__doc__)
     p.add_argument("-c", "--config", default="config.yaml", help="path to config YAML")
@@ -82,6 +91,12 @@ def build_parser() -> argparse.ArgumentParser:
     r = sub.add_parser("run")
     r.add_argument("--today", help="override 'today' (ISO date)")
     r.set_defaults(func=cmd_run)
+
+    s = sub.add_parser("serve", help="local web dashboard for the results")
+    s.add_argument("--host", default="127.0.0.1")
+    s.add_argument("--port", type=int, default=8000)
+    s.add_argument("--today", help="override 'as of' date (ISO)")
+    s.set_defaults(func=cmd_serve)
     return p
 
 

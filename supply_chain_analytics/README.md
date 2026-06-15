@@ -43,18 +43,41 @@ export ACUMATICA_USER=...                # secrets via env vars, never in YAML
 export ACUMATICA_PASSWORD=...
 ```
 
-## Usage
+## Quick start — run it locally in one command
+
+No Acumatica or config needed; this seeds a demo dataset and serves a dashboard:
+
+```bash
+cd supply_chain_analytics
+pip install -r requirements.txt
+python -m sca.web --demo
+```
+
+Then open the printed link: **http://127.0.0.1:8000**
+
+The page shows the component-coverage table (with EXPEDITE/WATCH/OK flags),
+order ETAs, and the exception lists; `/api/data` returns the same as JSON.
+Change the port with `--port 9000`, or expose on your LAN with
+`--host 0.0.0.0`. The demo writes a throwaway `sqlite_demo.db` in the current
+directory.
+
+## Usage (CLI)
 
 ```bash
 python -m sca.cli -c config.yaml init-db    # create the schema
 python -m sca.cli -c config.yaml etl        # pull GIs -> warehouse
 python -m sca.cli -c config.yaml analyze    # coverage + ETAs + exceptions
 python -m sca.cli -c config.yaml run        # etl + analyze (daily job)
+python -m sca.cli -c config.yaml serve      # web dashboard on real data
 ```
 
 `analyze` accepts `--today YYYY-MM-DD` for what-if / backtest runs.
 
 Schedule the daily job with `scripts/run_daily.sh` (cron / Task Scheduler).
+
+> The dashboard uses only the Python standard library (`http.server`), so it
+> adds no extra dependencies. It's a local/dev server — front it with a proper
+> WSGI/reverse proxy before any real deployment.
 
 ## Configuration
 
@@ -99,6 +122,8 @@ end-to-end SQLite run.
 | `exceptions_report.py` | daily exception digest |
 | `pipeline.py` | SQL read/orchestration |
 | `cli.py` | command-line entry point |
+| `web.py` | stdlib web dashboard (`/` HTML, `/api/data` JSON) |
+| `demo.py` | self-contained demo dataset for `--demo` |
 
 ## Not yet implemented (next iteration)
 
