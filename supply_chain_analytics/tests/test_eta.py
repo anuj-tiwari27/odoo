@@ -45,6 +45,28 @@ def test_same_day_when_all_on_hand():
     assert orders.iloc[0]["committed_ship"] == today + timedelta(days=1)
 
 
+def test_zero_assembly_pack_ships_same_day():
+    today = date(2026, 6, 1)
+    bom = pd.DataFrame([
+        {"parent_item_id": "KIT", "component_item_id": "SEAL", "qty_per": 1},
+    ])
+    onhand = pd.DataFrame([{"item_id": "SEAL", "qty_onhand": 100,
+                            "qty_allocated": 0}])
+    items = pd.DataFrame([
+        {"item_id": "KIT", "lead_time_wks": 0, "assembly_days": 0,
+         "pack_ship_days": 0},
+        {"item_id": "SEAL", "lead_time_wks": 2, "assembly_days": 0,
+         "pack_ship_days": 0},
+    ])
+    so = pd.DataFrame([{"so_id": "SO1", "line_id": "1", "customer": "Acme",
+                        "item_id": "KIT", "qty": 4}])
+    _, orders = compute_order_etas(so, bom, onhand, pd.DataFrame(
+        columns=["item_id", "qty_ordered", "promised_date"]), items, today)
+    # Zero build/pack time + on-hand component -> ships today, not + default.
+    assert orders.iloc[0]["committed_ship"] == today
+    assert bool(orders.iloc[0]["same_day"]) is True
+
+
 def test_constraint_uses_lead_time_when_short():
     today = date(2026, 6, 1)
     bom = pd.DataFrame([

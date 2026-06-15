@@ -23,6 +23,18 @@ from datetime import date, timedelta
 import pandas as pd
 
 
+def _param(by_item: dict, item_id: str, default: float) -> float:
+    """Per-item numeric parameter, falling back to ``default`` only on null.
+
+    Unlike ``value or default``, a stored ``0`` (e.g. zero pack/ship time) is
+    kept rather than mistaken for "missing".
+    """
+    value = by_item.get(item_id, default)
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return float(default)
+    return float(value)
+
+
 def explode_bom(item_id: str, qty: float, bom: pd.DataFrame,
                 _seen: frozenset[str] | None = None) -> dict[str, float]:
     """Recursively explode an item to purchased leaf components.
@@ -108,8 +120,10 @@ def compute_order_etas(so_lines: pd.DataFrame, bom: pd.DataFrame,
             if avail > constraint_date or constraint_item is None:
                 constraint_date, constraint_item = avail, leaf
 
-        assembly = float(assembly_by_item.get(line.item_id, default_assembly_days) or default_assembly_days)
-        pack_ship = float(packship_by_item.get(line.item_id, default_pack_ship_days) or default_pack_ship_days)
+        # Per-item value wins; fall back to the default only when null/NaN (a
+        # legitimate 0 must NOT be treated as missing).
+        assembly = _param(assembly_by_item, line.item_id, default_assembly_days)
+        pack_ship = _param(packship_by_item, line.item_id, default_pack_ship_days)
         # Build/pack/ship time is in days and may be fractional; round up to days.
         added_days = int(-(-(assembly + pack_ship) // 1))  # ceil
         line_eta = constraint_date + timedelta(days=added_days)
