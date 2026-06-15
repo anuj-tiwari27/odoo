@@ -1,0 +1,7 @@
+{
+  "@odata.context": "https://site/odata/Co/$metadata#GI-OpenPOs",
+  "value": [
+    {"OrderNbr": "PO1003", "InventoryID": "SEAL", "VendorID": "MILL-A",
+     "OrderQty": 500, "PromisedOn": "2026-06-20", "Warehouse": "MAIN"}
+  ]
+}

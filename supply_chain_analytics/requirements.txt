@@ -1,0 +1,8 @@
+pandas>=2.0
+SQLAlchemy>=2.0
+requests>=2.28
+PyYAML>=6.0
+# Postgres driver (only needed for the prod database_url):
+# psycopg2-binary>=2.9
+# Dev/test:
+pytest>=7.0

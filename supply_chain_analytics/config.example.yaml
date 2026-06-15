@@ -1,0 +1,66 @@
+# Copy to config.yaml and edit. Secrets come from env vars (never commit them).
+#
+# Dev:  database_url: "sqlite:///sca.db"
+# Prod: database_url: "postgresql+psycopg2://user:pass@host:5432/scadw"
+database_url: "sqlite:///sca.db"
+
+acumatica:
+  base_url: "https://your-site.acumatica.com"
+  company: "YourCompany"
+  # Credentials are read from the environment if omitted here:
+  username: "${ACUMATICA_USER}"
+  password: "${ACUMATICA_PASSWORD}"
+  verify_ssl: true
+  timeout_seconds: 60
+  # Logical feed -> Generic Inquiry (OData entity) name. Tick "Expose via
+  # OData" on each GI in Acumatica.
+  inquiries:
+    items: "GI-Items"
+    vendors: "GI-Vendors"
+    inventory_onhand: "GI-InventoryOnHand"
+    open_pos: "GI-OpenPOs"
+    sales_orders: "GI-SalesOrders"
+    bom: "GI-BOM"
+    po_receipts: "GI-POReceipts"
+    shipments: "GI-Shipments"
+
+# Forecast disaggregation profile. Weights are relative and auto-normalised.
+seasonality:
+  week_of_month_weights: [1.0, 1.1, 1.0, 0.9, 0.5]   # weeks 1..5 of a month
+  day_of_week_weights:   [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0]  # Mon..Sun
+
+planning:
+  coverage_horizon_weeks: 5
+  default_lead_time_wks: 4.0
+  default_safety_stock: 0.0
+  default_assembly_days: 0.5
+  default_pack_ship_days: 0.5
+
+# Per-feed field mapping: target_column -> Acumatica GI field name.
+# Omit a feed to load its GI rows verbatim (handy when names already match).
+field_maps:
+  inventory_onhand:
+    item_id: "InventoryID"
+    warehouse: "Warehouse"
+    qty_onhand: "QtyOnHand"
+    qty_allocated: "QtyAllocated"
+    snapshot_date: "LastModified"
+  open_pos:
+    po_id: "OrderNbr"
+    item_id: "InventoryID"
+    vendor_id: "VendorID"
+    qty_ordered: "OrderQty"
+    promised_date: "PromisedOn"
+    warehouse: "Warehouse"
+  sales_orders:
+    so_id: "OrderNbr"
+    line_id: "LineNbr"
+    customer: "CustomerName"
+    item_id: "InventoryID"
+    qty: "OrderQty"
+    request_date: "RequestedOn"
+    warehouse: "Warehouse"
+  bom:
+    parent_item_id: "ParentID"
+    component_item_id: "ComponentID"
+    qty_per: "QtyPer"

@@ -1,0 +1,10 @@
+{
+  "@odata.context": "https://site/odata/Co/$metadata#GI-OpenPOs",
+  "value": [
+    {"OrderNbr": "PO1001", "InventoryID": "EXTR-RAIL", "VendorID": "MILL-A",
+     "OrderQty": 200, "PromisedOn": "2026-06-10", "Warehouse": "MAIN"},
+    {"OrderNbr": "PO1002", "InventoryID": "ROD", "VendorID": "MILL-B",
+     "OrderQty": 100, "PromisedOn": "2026-06-08", "Warehouse": "MAIN"}
+  ],
+  "@odata.nextLink": "https://site/odata/Co/GI-OpenPOs?$skiptoken=1"
+}
