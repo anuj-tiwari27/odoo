@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<odoo>
+
+<!-- Extend the website.page form view with SEO fields -->
+<record id="website_pages_form_view_seo" model="ir.ui.view">
+    <field name="name">website.page.form.seo</field>
+    <field name="model">website.page</field>
+    <field name="inherit_id" ref="website.website_pages_form_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='website_indexed']" position="after">
+            <field name="seo_score" widget="progressbar"/>
+            <field name="sitemap_priority"/>
+            <field name="sitemap_changefreq"/>
+            <field name="robots_directive" placeholder="e.g. noindex, nofollow"/>
+            <field name="canonical_url_override" placeholder="https://..."/>
+        </xpath>
+    </field>
+</record>
+
+<!-- SEO Dashboard: Tree view for all pages with SEO scores -->
+<record id="website_page_seo_tree" model="ir.ui.view">
+    <field name="name">website.page.seo.tree</field>
+    <field name="model">website.page</field>
+    <field name="arch" type="xml">
+        <list string="SEO Dashboard">
+            <field name="name"/>
+            <field name="url"/>
+            <field name="seo_score" widget="progressbar"/>
+            <field name="is_seo_optimized" widget="boolean_toggle" readonly="1"/>
+            <field name="website_indexed" widget="boolean_toggle"/>
+            <field name="website_meta_title"/>
+            <field name="website_meta_description"/>
+            <field name="sitemap_priority"/>
+            <field name="sitemap_changefreq"/>
+        </list>
+    </field>
+</record>
+
+<!-- SEO Dashboard search view -->
+<record id="website_page_seo_search" model="ir.ui.view">
+    <field name="name">website.page.seo.search</field>
+    <field name="model">website.page</field>
+    <field name="arch" type="xml">
+        <search string="SEO Search">
+            <field name="name"/>
+            <field name="url"/>
+            <filter name="optimized" string="SEO Optimized" domain="[('is_seo_optimized', '=', True)]"/>
+            <filter name="not_optimized" string="Not Optimized" domain="[('is_seo_optimized', '=', False)]"/>
+            <filter name="not_indexed" string="Not Indexed" domain="[('website_indexed', '=', False)]"/>
+            <filter name="missing_title" string="Missing Title" domain="[('website_meta_title', '=', False)]"/>
+            <filter name="missing_description" string="Missing Description" domain="[('website_meta_description', '=', False)]"/>
+            <separator/>
+            <group expand="0" string="Group By">
+                <filter name="group_changefreq" string="Change Frequency" context="{'group_by': 'sitemap_changefreq'}"/>
+                <filter name="group_indexed" string="Indexed" context="{'group_by': 'website_indexed'}"/>
+            </group>
+        </search>
+    </field>
+</record>
+
+<!-- SEO Dashboard action -->
+<record id="action_website_seo_dashboard" model="ir.actions.act_window">
+    <field name="name">SEO Dashboard</field>
+    <field name="res_model">website.page</field>
+    <field name="view_mode">list,form</field>
+    <field name="view_ids" eval="[
+        (5, 0, 0),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('website_page_seo_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('website.website_pages_form_view')}),
+    ]"/>
+    <field name="search_view_id" ref="website_page_seo_search"/>
+    <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+            No pages found
+        </p>
+        <p>
+            Create website pages to start optimizing their SEO.
+        </p>
+    </field>
+</record>
+
+<!-- Extend website settings with SEO structured data options -->
+<record id="res_config_settings_view_form_seo" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.seo</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//setting[@id='social_default_image_setting']" position="after">
+            <setting
+                id="json_ld_organization_setting"
+                string="Organization Structured Data"
+                help="Include Schema.org Organization structured data on all pages for richer search results."
+            >
+                <field name="seo_json_ld_organization"/>
+            </setting>
+            <setting
+                id="json_ld_breadcrumb_setting"
+                string="Breadcrumb Structured Data"
+                help="Include Schema.org BreadcrumbList structured data on inner pages."
+            >
+                <field name="seo_json_ld_breadcrumb"/>
+            </setting>
+            <setting
+                id="json_ld_website_setting"
+                string="WebSite Structured Data"
+                help="Include Schema.org WebSite structured data on the homepage."
+            >
+                <field name="seo_json_ld_website"/>
+            </setting>
+        </xpath>
+    </field>
+</record>
+
+<!-- Add SEO Dashboard menu under Website -->
+<menuitem id="menu_seo_dashboard"
+    name="SEO Dashboard"
+    parent="website.menu_website_configuration"
+    action="action_website_seo_dashboard"
+    sequence="50"/>
+
+</odoo>

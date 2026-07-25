@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<odoo>
+
+<!-- Inject JSON-LD structured data into the page head -->
+<template id="json_ld_inject" inherit_id="website.layout" name="SEO Structured Data">
+    <xpath expr="//head/link[@rel='canonical']" position="after">
+        <t t-set="seo_website" t-value="website.sudo()"/>
+        <t t-if="seo_website.seo_json_ld_organization">
+            <script type="application/ld+json" t-out="json.dumps(seo_website._get_json_ld_organization())"/>
+        </t>
+        <t t-if="seo_website.seo_json_ld_website and (not request.httprequest.path or request.httprequest.path == '/')">
+            <script type="application/ld+json" t-out="json.dumps(seo_website._get_json_ld_website())"/>
+        </t>
+        <t t-if="seo_website.seo_json_ld_breadcrumb and request.httprequest.path and request.httprequest.path != '/'">
+            <t t-set="breadcrumb_data" t-value="seo_website._get_json_ld_breadcrumb(request.httprequest.path)"/>
+            <script t-if="breadcrumb_data" type="application/ld+json" t-out="json.dumps(breadcrumb_data)"/>
+        </t>
+    </xpath>
+</template>
+
+<!-- Override robots meta to support per-page custom directives -->
+<template id="robots_directive_override" inherit_id="website.layout" name="Custom Robots Directive">
+    <xpath expr="//head/meta[@name='robots']" position="attributes">
+        <attribute name="t-att-content">
+            (main_object and hasattr(main_object, 'robots_directive') and main_object.sudo().robots_directive) or 'noindex'
+        </attribute>
+    </xpath>
+</template>
+
+<!-- Override canonical URL to support per-page overrides -->
+<template id="canonical_override" inherit_id="website.layout" name="Canonical URL Override">
+    <xpath expr="//head/link[@rel='canonical']" position="attributes">
+        <attribute name="t-att-href">
+            (main_object and hasattr(main_object, 'canonical_url_override') and main_object.sudo().canonical_url_override) or website._get_canonical_url()
+        </attribute>
+    </xpath>
+</template>
+
+</odoo>
